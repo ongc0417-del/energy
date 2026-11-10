@@ -1,0 +1,64 @@
+const USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+
+async function checkHasUSDT(address){
+  try{
+    const res = await fetch(`https://apilist.tronscanapi.com/api/accountv2?address=${address}`);
+    const data = await res.json();
+    if(data && data.trc20token_balances){
+      const usdt = data.trc20token_balances.find(t => t.tokenId === USDT_CONTRACT || t.tokenAbbr === 'USDT');
+      if(usdt && parseFloat(usdt.balance) > 0) return true;
+    }
+    return false;
+  }catch(e){
+    return false;
+  }
+}
+
+async function pasteAddr(type){
+  try{
+    let text = await navigator.clipboard.readText();
+    text = text.trim();
+    if(!text.startsWith('T') || text.length < 30){
+      alert('请粘贴有效的 TRC20 地址');
+      return;
+    }
+    if(type==='from'){
+      fromAddr = text;
+      document.getElementById('fromBox').innerText = text;
+      document.getElementById('fromBox').classList.add('active');
+      document.getElementById('fromCheck').innerHTML = '<span class="check">✓ 检查通过</span>';
+    }else{
+      toAddr = text;
+      document.getElementById('toBox').innerText = text;
+      document.getElementById('toBox').classList.add('active');
+      document.getElementById('toCheck').innerHTML = '<span class="check">检查中...</span>';
+      const hasUSDT = await checkHasUSDT(text);
+      needEnergy = hasUSDT ? 1 : 2;
+      document.getElementById('toCheck').innerHTML = '<span class="check">✓ 检查通过' + (hasUSDT ? '（有USDT）' : '（无USDT）') + '</span>';
+    }
+    calc();
+  }catch(e){
+    alert('请手动粘贴地址');
+  }
+}
+
+async function focusInput(type){
+  const text = prompt(type==='from'?'输入能量接收地址':'输入对方收款地址');
+  if(text && text.startsWith('T') && text.length >= 30){
+    if(type==='from'){
+      fromAddr = text;
+      document.getElementById('fromBox').innerText = text;
+      document.getElementById('fromBox').classList.add('active');
+      document.getElementById('fromCheck').innerHTML = '<span class="check">✓ 检查通过</span>';
+    }else{
+      toAddr = text;
+      document.getElementById('toBox').innerText = text;
+      document.getElementById('toBox').classList.add('active');
+      document.getElementById('toCheck').innerHTML = '<span class="check">检查中...</span>';
+      const hasUSDT = await checkHasUSDT(text);
+      needEnergy = hasUSDT ? 1 : 2;
+      document.getElementById('toCheck').innerHTML = '<span class="check">✓ 检查通过' + (hasUSDT ? '（有USDT）' : '（无USDT）') + '</span>';
+    }
+    calc();
+  }
+}
