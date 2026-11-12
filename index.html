@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TRX能量宝</title>
+<title>能量领取</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
@@ -13,23 +13,41 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
 .header .close{color:#007aff;font-size:16px}
 .banner{background:#fff9e6;margin:12px 16px;padding:12px;border-radius:12px;display:flex;align-items:center;justify-content:space-between}
 .banner span{color:#e6a23c;font-size:14px}
+.banner .enter{background:#fff;border:1px solid #e6a23c;color:#e6a23c;padding:6px 16px;border-radius:20px;font-size:14px}
 .cards{display:flex;gap:12px;margin:0 16px 16px}
 .card{flex:1;background:#fff;padding:16px;border-radius:12px}
 .card .label{font-size:13px;color:#999;margin-bottom:4px}
 .card .value{font-size:22px;font-weight:600}
 .card .sub{font-size:12px;color:#999;margin-top:4px}
+.recharge-btn{background:#fff;border:1px solid #e6a23c;color:#e6a23c;padding:6px 12px;border-radius:16px;font-size:13px;float:right;margin-top:-4px}
 .section{background:#fff;margin:0 16px 16px;padding:16px;border-radius:12px}
 .section-title{font-size:15px;font-weight:500;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
 .paste{color:#007aff;font-size:14px}
 .input-box{background:#f8f8f8;border:1px solid #eee;border-radius:10px;padding:12px;min-height:48px;font-size:15px;word-break:break-all}
 .input-box.active{border-color:#e6a23c}
+.check{color:#52c41a;font-size:13px;margin-left:8px}
+.tip{font-size:13px;color:#999;margin-top:8px;line-height:1.5}
+.pay-options{display:flex;gap:12px;margin-top:12px}
+.pay-option{flex:1;border:1px solid #eee;border-radius:12px;padding:12px;text-align:center;cursor:pointer}
+.pay-option.active{border-color:#e6a23c;background:#fff9e6}
+.pay-option .name{font-size:14px;margin-bottom:4px}
+.pay-option .desc{font-size:12px;color:#999}
 .btn{background:#e6a23c;color:#fff;border:none;border-radius:25px;padding:14px;font-size:16px;width:100%;margin-top:16px}
 .btn:disabled{background:#ddd;color:#999}
-.btn-blue{background:#0099ff}
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:200}
+.modal-content{background:#fff;margin:20px;padding:24px;border-radius:16px;max-width:340px;width:100%}
+.modal h3{font-size:18px;margin-bottom:16px;text-align:center}
+.modal ol{padding-left:20px;margin-bottom:16px;line-height:1.8;font-size:14px}
+.modal .btn{margin-top:8px}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1px solid #eee;padding:8px 0;padding-bottom:env(safe-area-inset-bottom)}
 .nav-item{flex:1;text-align:center;font-size:12px;color:#999;padding:4px}
 .nav-item.active{color:#e6a23c}
 .nav-item .icon{font-size:20px;margin-bottom:2px}
+.success{text-align:center;padding:40px 20px}
+.success .icon{font-size:48px;color:#52c41a;margin-bottom:16px}
+.success h2{font-size:20px;margin-bottom:20px}
+.addr-box{background:#f8f8f8;padding:12px;border-radius:10px;margin:8px 0;text-align:left;font-size:14px;word-break:break-all}
+.copy-btn{color:#007aff;font-size:13px;float:right}
 .page{display:none}
 .page.active{display:block}
 </style>
@@ -42,9 +60,25 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
   <span></span>
 </div>
 
-<!-- 能量领取页 -->
+<div class="modal" id="tutorial">
+  <div class="modal-content">
+    <h3>领取能量操作教程</h3>
+    <ol>
+      <li>在“能量接收地址”栏填入自己的钱包地址（要转出 USDT 的地址）。</li>
+      <li>在“转账目标地址”栏填入对方的收款地址。</li>
+      <li>系统依对方地址自动判断所需能量：对方已持有 USDT 需 1 笔，没有 USDT 需 2 笔。</li>
+      <li>选择付款方式后按“确认下单”，能量到账后回到钱包转出 USDT 即可。</li>
+    </ol>
+    <p style="font-size:13px;color:#999;margin-bottom:12px">今日赞助能量用完后，到“充值”分页充值 TRX，付款方式选“余额支付”即可继续租用。</p>
+    <button class="btn" onclick="document.getElementById('tutorial').style.display='none'">我已了解</button>
+  </div>
+</div>
+
 <div class="page active" id="energyPage">
-  <div class="banner"><span>⚡ 本能量由平台独家赞助</span></div>
+  <div class="banner">
+    <span>⚡ 本能量由平台独家赞助</span>
+    <span class="enter">进入</span>
+  </div>
   <div class="cards">
     <div class="card">
       <div class="label">赞助能量</div>
@@ -53,144 +87,320 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
     </div>
     <div class="card">
       <div class="label">用户余额</div>
-      <div class="value">0.00</div>
+      <div class="value" id="balance">0.00</div>
       <div class="sub">TRX</div>
+      <button class="recharge-btn" onclick="showPage('rechargePage')">充值</button>
     </div>
   </div>
+
   <div class="section">
     <div class="section-title">1 能量接收地址 <span class="paste" onclick="pasteAddr('from')">粘贴</span></div>
     <div class="input-box" id="fromBox" onclick="focusInput('from')">输入接收能量的 TRC20 地址</div>
+    <div id="fromCheck"></div>
   </div>
+
   <div class="section">
     <div class="section-title">2 对方收款地址 <span class="paste" onclick="pasteAddr('to')">粘贴</span></div>
-    <div class="input-box" id="toBox" onclick="focusInput('to')">输入对方收款地址</div>
+    <div class="input-box" id="toBox" onclick="focusInput('to')">输入对方收款地址，判断所需能量</div>
+    <div id="toCheck"></div>
+    <div class="tip">系统自动计算对方地址转账所需能量数量，无需手动选择笔数。<br>填写两个地址后自动试算。</div>
   </div>
+
+  <div class="section" id="calcBox" style="display:none">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+      <span>本单笔数</span><span id="needCount">1 笔</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+      <span>应付金额</span><span id="payAmount">0.00 TRX</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+      <span>委派时效</span><span>1 小时</span>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span>比直接燃烧省</span><span id="saveAmount">6.42 TRX</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">支付方式</div>
+    <div class="pay-options">
+      <div class="pay-option active" id="payFree" onclick="selectPay('free')">
+        <div class="name">赞助能量支付</div>
+        <div class="desc" id="freeDesc">今日剩余 3 笔</div>
+      </div>
+      <div class="pay-option" id="payBalance" onclick="selectPay('balance')">
+        <div class="name">余额支付</div>
+        <div class="desc">用户余额不足</div>
+      </div>
+    </div>
+  </div>
+
   <button class="btn" id="submitBtn" disabled onclick="submitOrder()">确认下单</button>
 </div>
 
-<!-- USDT 换 TRX 页 -->
+<!-- USDT 换 TRX -->
 <div class="page" id="swapPage">
   <div class="section">
-    <div class="section-title" style="text-align:center;">USDT 换 TRX</div>
+    <div class="section-title" style="justify-content:center;">USDT 换 TRX</div>
     <p style="text-align:center;color:#2ecc71;margin-bottom:16px;">当前价格 1 USDT ≈ 3.15 TRX</p>
-    <input id="usdtAmount" class="input-box" style="width:100%;border:1px solid #eee;" placeholder="输入 USDT 数量" oninput="calc()">
-    <input id="trxAmount" class="input-box" style="width:100%;border:1px solid #eee;margin-top:12px;" placeholder="预计获得 TRX" readonly>
-    <input id="receiveAddress" class="input-box" style="width:100%;border:1px solid #eee;margin-top:12px;" placeholder="接收 TRX 地址">
-    <button class="btn btn-blue" onclick="submitSwap()">立即兑换</button>
+    <input id="usdtAmount" class="input-box" style="width:100%;" placeholder="输入 USDT 数量" oninput="calcSwap()">
+    <input id="trxAmount" class="input-box" style="width:100%;margin-top:12px;" placeholder="预计获得 TRX" readonly>
+    <input id="receiveAddress" class="input-box" style="width:100%;margin-top:12px;" placeholder="接收 TRX 地址">
+    <button class="btn" onclick="submitSwap()">立即兑换</button>
   </div>
 </div>
 
-<!-- 查地址页 -->
+<!-- 查地址 -->
 <div class="page" id="queryPage">
   <div class="section">
-    <div class="section-title" style="text-align:center;">查地址</div>
-    <input id="queryAddress" class="input-box" style="width:100%;border:1px solid #eee;" placeholder="输入 TRC20 地址">
+    <div class="section-title" style="justify-content:center;">查地址</div>
+    <input id="queryAddress" class="input-box" style="width:100%;" placeholder="输入 TRC20 地址">
     <button class="btn" onclick="queryAddr()">查询</button>
     <div id="queryResult" style="margin-top:16px;font-size:14px;line-height:1.6;"></div>
   </div>
 </div>
 
+<div class="page" id="rechargePage">
+  <div class="section">
+    <div class="label">用户余额</div>
+    <div class="value" style="font-size:28px;margin:8px 0">0.00 TRX</div>
+    <div style="background:#fff9e6;padding:12px;border-radius:10px;font-size:13px;color:#e6a23c;margin:12px 0">⚠️ 只有 TRX（TRON 网络）会计入你的余额。</div>
+    <div class="label">充值金额（TRX）</div>
+    <input type="number" id="rechargeAmount" placeholder="最低 10 TRX" style="width:100%;padding:12px;border:1px solid #eee;border-radius:10px;margin:8px 0;font-size:16px">
+    <button class="btn" onclick="createRecharge()">生成充值金额</button>
+    <div class="tip">最低充值金额 10.00 TRX。低于此金额会累积，达到后一并入账。</div>
+  </div>
+  <div class="section">
+    <div class="section-title">充值记录</div>
+    <div style="text-align:center;color:#999;padding:20px">还没有充值记录。</div>
+  </div>
+</div>
+
+<div class="page" id="userPage">
+  <div class="section">
+    <div class="section-title" onclick="alert('订单记录')">订单记录 <span>›</span></div>
+    <div class="section-title">用户 ID <span id="userId">-</span></div>
+    <div class="section-title" onclick="alert('用户须知')">用户须知 <span>›</span></div>
+    <div class="section-title" onclick="alert('指南')">指南 <span>›</span></div>
+    <div class="section-title">语言 <span>简体中文</span></div>
+    <div class="section-title" onclick="alert('联系客服')">联系客服 <span>›</span></div>
+  </div>
+</div>
+
+<div class="page" id="successPage">
+  <div class="success">
+    <div class="icon">✓</div>
+    <h2>能量已到账</h2>
+    <div style="text-align:left;margin:20px 0">
+      <div style="font-size:13px;color:#999;margin-bottom:4px">能量接收地址</div>
+      <div class="addr-box" id="successFrom"></div>
+      <div style="font-size:13px;color:#999;margin:12px 0 4px">转账目标地址</div>
+      <div class="addr-box" id="successTo"><span class="copy-btn" onclick="copyTo()">复制</span><span id="successToText"></span></div>
+    </div>
+    <p style="font-size:13px;color:#999;margin-bottom:20px">请复制对方收款地址后，点击“完成”，然后返回钱包进行转账即可。</p>
+    <button class="btn" style="background:#52c41a" onclick="showPage('energyPage')">完成</button>
+  </div>
+</div>
+
 <div class="bottom-nav">
-  <div class="nav-item active" onclick="showPage('energy')"><div class="icon">⚡</div>能量</div>
-  <div class="nav-item" onclick="showPage('swap')"><div class="icon">💰</div>兑换</div>
-  <div class="nav-item" onclick="showPage('query')"><div class="icon">🔍</div>查地址</div>
+  <div class="nav-item active" onclick="showPage('energyPage')"><div class="icon">⚡</div>能量</div>
+  <div class="nav-item" onclick="showPage('swapPage')"><div class="icon">💰</div>兑换</div>
+  <div class="nav-item" onclick="showPage('queryPage')"><div class="icon">🔍</div>查地址</div>
 </div>
 
 <script>
 const tg = window.Telegram.WebApp;
-tg.ready(); tg.expand();
+tg.ready();
+tg.expand();
+
+const USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
 
 let freeLeft = 3;
-let fromAddr = '', toAddr = '';
+let balance = 0;
+let fromAddr = '';
+let toAddr = '';
+let payType = 'free';
+let needEnergy = 1;
 let claimedAddresses = JSON.parse(localStorage.getItem('claimedAddresses') || '[]');
 
-function showPage(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(page + 'Page').classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const titles = {energy:'能量领取', swap:'USDT换TRX', query:'查地址'};
-  document.getElementById('pageTitle').innerText = titles[page] || '能量领取';
-  const idx = {energy:0, swap:1, query:2}[page];
-  if (idx !== undefined) document.querySelectorAll('.nav-item')[idx].classList.add('active');
-  location.hash = page;
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const titles = {energyPage:'能量领取', swapPage:'USDT换TRX', queryPage:'查地址', rechargePage:'充值', userPage:'个人中心'};
+  document.getElementById('pageTitle').innerText = titles[id] || '能量领取';
+  if(id==='energyPage') document.querySelectorAll('.nav-item')[0].classList.add('active');
+  if(id==='swapPage') document.querySelectorAll('.nav-item')[1].classList.add('active');
+  if(id==='queryPage') document.querySelectorAll('.nav-item')[2].classList.add('active');
 }
 
-async function pasteAddr(type) {
-  try {
-    let text = (await navigator.clipboard.readText()).trim();
-    if (!text.startsWith('T') || text.length < 30) return alert('请粘贴有效地址');
-    if (type === 'from') {
+async function checkAddress(address){
+  try{
+    const res = await fetch(`https://apilist.tronscanapi.com/api/accountv2?address=${address}`);
+    const data = await res.json();
+    let hasUsdt = false;
+    let activated = false;
+    if(data && data.balance !== undefined) activated = true;
+    if(data && data.trc20token_balances){
+      const usdt = data.trc20token_balances.find(t => t.tokenId === USDT_CONTRACT || t.tokenAbbr === 'USDT');
+      if(usdt && parseFloat(usdt.balance) > 0) hasUsdt = true;
+    }
+    return {hasUsdt, activated};
+  }catch(e){
+    return {hasUsdt: false, activated: false};
+  }
+}
+
+async function pasteAddr(type){
+  try{
+    let text = await navigator.clipboard.readText();
+    text = text.trim();
+    if(!text.startsWith('T') || text.length < 30){
+      alert('请粘贴有效的 TRC20 地址');
+      return;
+    }
+    if(type==='from'){
       fromAddr = text;
       document.getElementById('fromBox').innerText = text;
       document.getElementById('fromBox').classList.add('active');
-    } else {
+      document.getElementById('fromCheck').innerHTML = '<span class="check">✓ 检查通过</span>';
+    }else{
       toAddr = text;
       document.getElementById('toBox').innerText = text;
       document.getElementById('toBox').classList.add('active');
+      document.getElementById('toCheck').innerHTML = '<span class="check">检查中...</span>';
+      const info = await checkAddress(text);
+      needEnergy = info.hasUsdt ? 1 : 2;
+      let msg = info.activated ? (info.hasUsdt ? '有USDT' : '无USDT') : '未激活';
+      document.getElementById('toCheck').innerHTML = '<span class="check">✓ ' + msg + '</span>';
     }
-    document.getElementById('submitBtn').disabled = !(fromAddr && toAddr);
-  } catch(e) { alert('请手动输入'); }
-}
-
-function focusInput(type) {
-  const text = prompt(type==='from'?'输入能量接收地址':'输入对方收款地址');
-  if (text && text.startsWith('T') && text.length >= 30) {
-    if (type === 'from') {
-      fromAddr = text;
-      document.getElementById('fromBox').innerText = text;
-    } else {
-      toAddr = text;
-      document.getElementById('toBox').innerText = text;
-    }
-    document.getElementById('submitBtn').disabled = !(fromAddr && toAddr);
+    calc();
+  }catch(e){
+    alert('请手动粘贴地址');
   }
 }
 
-function submitOrder() {
-  if (claimedAddresses.includes(fromAddr)) {
+async function focusInput(type){
+  const text = prompt(type==='from'?'输入能量接收地址':'输入对方收款地址');
+  if(text && text.startsWith('T') && text.length >= 30){
+    if(type==='from'){
+      fromAddr = text;
+      document.getElementById('fromBox').innerText = text;
+      document.getElementById('fromBox').classList.add('active');
+      document.getElementById('fromCheck').innerHTML = '<span class="check">✓ 检查通过</span>';
+    }else{
+      toAddr = text;
+      document.getElementById('toBox').innerText = text;
+      document.getElementById('toBox').classList.add('active');
+      document.getElementById('toCheck').innerHTML = '<span class="check">检查中...</span>';
+      const info = await checkAddress(text);
+      needEnergy = info.hasUsdt ? 1 : 2;
+      let msg = info.activated ? (info.hasUsdt ? '有USDT' : '无USDT') : '未激活';
+      document.getElementById('toCheck').innerHTML = '<span class="check">✓ ' + msg + '</span>';
+    }
+    calc();
+  }
+}
+
+function calc(){
+  if(!fromAddr || !toAddr) return;
+  document.getElementById('calcBox').style.display = 'block';
+  document.getElementById('needCount').innerText = needEnergy + ' 笔';
+  const amount = payType==='free' ? 0 : needEnergy * 2;
+  document.getElementById('payAmount').innerText = amount.toFixed(2) + ' TRX';
+  document.getElementById('saveAmount').innerText = (needEnergy * 6.42).toFixed(2) + ' TRX';
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('freeDesc').innerText = '今日剩余 ' + freeLeft + ' 笔';
+}
+
+function selectPay(type){
+  payType = type;
+  document.getElementById('payFree').classList.toggle('active', type==='free');
+  document.getElementById('payBalance').classList.toggle('active', type==='balance');
+  calc();
+}
+
+function submitOrder(){
+  if(claimedAddresses.includes(fromAddr)){
     alert('高危地址，请使用余额购买能量');
     return;
   }
-  if (freeLeft < 1) {
+  if(needEnergy > 1){
+    alert('高危地址，请使用余额购买能量');
+    return;
+  }
+  if(payType==='free' && freeLeft < needEnergy){
     alert('今日免费额度不足，请使用余额购买');
     return;
   }
-  freeLeft--;
-  claimedAddresses.push(fromAddr);
-  localStorage.setItem('claimedAddresses', JSON.stringify(claimedAddresses));
-  document.getElementById('freeCount').innerText = freeLeft + ' 笔';
-  alert('领取成功');
+  if(payType==='balance' && balance < needEnergy*2){
+    alert('余额不足，请先充值');
+    return;
+  }
+  document.getElementById('submitBtn').innerText = '处理中...';
+  document.getElementById('submitBtn').disabled = true;
+  setTimeout(()=>{
+    if(payType==='free'){
+      freeLeft -= needEnergy;
+      claimedAddresses.push(fromAddr);
+      localStorage.setItem('claimedAddresses', JSON.stringify(claimedAddresses));
+    }
+    document.getElementById('freeCount').innerText = freeLeft + ' 笔';
+    document.getElementById('successFrom').innerText = fromAddr;
+    document.getElementById('successToText').innerText = toAddr;
+    showPage('successPage');
+    document.getElementById('submitBtn').innerText = '确认下单';
+    document.getElementById('submitBtn').disabled = false;
+  }, 2000);
 }
 
-function calc() {
+function copyTo(){
+  navigator.clipboard.writeText(toAddr);
+  alert('已复制');
+}
+
+function createRecharge(){
+  const amount = document.getElementById('rechargeAmount').value;
+  if(!amount || amount < 10){
+    alert('最低充值 10 TRX');
+    return;
+  }
+  alert('请向以下地址转账 ' + amount + ' TRX：\nTYourRechargeAddressHere\n转账后等待确认入账');
+}
+
+function calcSwap(){
   const usdt = parseFloat(document.getElementById('usdtAmount').value) || 0;
   document.getElementById('trxAmount').value = (usdt * 3.15).toFixed(2);
 }
 
-function submitSwap() {
-  alert('兑换功能已提交（请接你的后台）');
+function submitSwap(){
+  alert('兑换功能已提交');
 }
 
-async function queryAddr() {
+async function queryAddr(){
   const addr = document.getElementById('queryAddress').value.trim();
-  if (!addr) return;
+  if(!addr) return;
   document.getElementById('queryResult').innerHTML = '查询中...';
-  try {
-    const res = await fetch(`https://apilist.tronscanapi.com/api/accountv2?address=${addr}`);
-    const data = await res.json();
+  try{
+    const info = await checkAddress(addr);
     let html = `<p>地址：${addr}</p>`;
-    html += `<p>TRX 余额：${(data.balance || 0)/1e6} TRX</p>`;
-    const usdt = (data.trc20token_balances || []).find(t => t.tokenAbbr === 'USDT');
-    html += `<p>USDT：${usdt ? usdt.balance/1e6 : 0}</p>`;
+    html += `<p>状态：${info.activated ? '已激活' : '未激活'}</p>`;
+    html += `<p>USDT：${info.hasUsdt ? '有' : '无'}</p>`;
     document.getElementById('queryResult').innerHTML = html;
-  } catch(e) {
+  }catch(e){
     document.getElementById('queryResult').innerHTML = '查询失败';
   }
 }
 
+if(tg.initDataUnsafe && tg.initDataUnsafe.user){
+  document.getElementById('userId').innerText = tg.initDataUnsafe.user.id;
+}
+
 // 根据 hash 打开对应页
-const hash = location.hash.replace('#','') || 'energy';
-showPage(hash);
+const hash = location.hash.replace('#','');
+if(hash === 'swap') showPage('swapPage');
+else if(hash === 'query') showPage('queryPage');
+else showPage('energyPage');
 </script>
 </body>
 </html>
