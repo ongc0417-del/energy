@@ -138,28 +138,6 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
   <button class="btn" id="submitBtn" disabled onclick="submitOrder()">确认下单</button>
 </div>
 
-<!-- USDT 换 TRX -->
-<div class="page" id="swapPage">
-  <div class="section">
-    <div class="section-title" style="justify-content:center;">USDT 换 TRX</div>
-    <p style="text-align:center;color:#2ecc71;margin-bottom:16px;">当前价格 1 USDT ≈ 3.15 TRX</p>
-    <input id="usdtAmount" class="input-box" style="width:100%;" placeholder="输入 USDT 数量" oninput="calcSwap()">
-    <input id="trxAmount" class="input-box" style="width:100%;margin-top:12px;" placeholder="预计获得 TRX" readonly>
-    <input id="receiveAddress" class="input-box" style="width:100%;margin-top:12px;" placeholder="接收 TRX 地址">
-    <button class="btn" onclick="submitSwap()">立即兑换</button>
-  </div>
-</div>
-
-<!-- 查地址 -->
-<div class="page" id="queryPage">
-  <div class="section">
-    <div class="section-title" style="justify-content:center;">查地址</div>
-    <input id="queryAddress" class="input-box" style="width:100%;" placeholder="输入 TRC20 地址">
-    <button class="btn" onclick="queryAddr()">查询</button>
-    <div id="queryResult" style="margin-top:16px;font-size:14px;line-height:1.6;"></div>
-  </div>
-</div>
-
 <div class="page" id="rechargePage">
   <div class="section">
     <div class="label">用户余额</div>
@@ -167,23 +145,13 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
     <div style="background:#fff9e6;padding:12px;border-radius:10px;font-size:13px;color:#e6a23c;margin:12px 0">⚠️ 只有 TRX（TRON 网络）会计入你的余额。</div>
     <div class="label">充值金额（TRX）</div>
     <input type="number" id="rechargeAmount" placeholder="最低 10 TRX" style="width:100%;padding:12px;border:1px solid #eee;border-radius:10px;margin:8px 0;font-size:16px">
-    <button class="btn" onclick="createRecharge()">生成充值金额</button>
+    <button class="btn" onclick="createRecharge()">生成充值地址</button>
     <div class="tip">最低充值金额 10.00 TRX。低于此金额会累积，达到后一并入账。</div>
+    <div id="rechargeResult" style="margin-top:16px;font-size:14px;"></div>
   </div>
   <div class="section">
     <div class="section-title">充值记录</div>
     <div style="text-align:center;color:#999;padding:20px">还没有充值记录。</div>
-  </div>
-</div>
-
-<div class="page" id="userPage">
-  <div class="section">
-    <div class="section-title" onclick="alert('订单记录')">订单记录 <span>›</span></div>
-    <div class="section-title">用户 ID <span id="userId">-</span></div>
-    <div class="section-title" onclick="alert('用户须知')">用户须知 <span>›</span></div>
-    <div class="section-title" onclick="alert('指南')">指南 <span>›</span></div>
-    <div class="section-title">语言 <span>简体中文</span></div>
-    <div class="section-title" onclick="alert('联系客服')">联系客服 <span>›</span></div>
   </div>
 </div>
 
@@ -204,8 +172,8 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
 
 <div class="bottom-nav">
   <div class="nav-item active" onclick="showPage('energyPage')"><div class="icon">⚡</div>能量</div>
-  <div class="nav-item" onclick="showPage('swapPage')"><div class="icon">💰</div>兑换</div>
-  <div class="nav-item" onclick="showPage('queryPage')"><div class="icon">🔍</div>查地址</div>
+  <div class="nav-item" onclick="showPage('rechargePage')"><div class="icon">💳</div>充值</div>
+  <div class="nav-item" onclick="showPage('userPage')"><div class="icon">👤</div>个人中心</div>
 </div>
 
 <script>
@@ -214,6 +182,7 @@ tg.ready();
 tg.expand();
 
 const USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+const RECHARGE_ADDRESS = 'TYourRechargeAddressHere'; // 改成你的充值地址
 
 let freeLeft = 3;
 let balance = 0;
@@ -227,11 +196,11 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const titles = {energyPage:'能量领取', swapPage:'USDT换TRX', queryPage:'查地址', rechargePage:'充值', userPage:'个人中心'};
+  const titles = {energyPage:'能量领取', rechargePage:'充值', userPage:'个人中心'};
   document.getElementById('pageTitle').innerText = titles[id] || '能量领取';
   if(id==='energyPage') document.querySelectorAll('.nav-item')[0].classList.add('active');
-  if(id==='swapPage') document.querySelectorAll('.nav-item')[1].classList.add('active');
-  if(id==='queryPage') document.querySelectorAll('.nav-item')[2].classList.add('active');
+  if(id==='rechargePage') document.querySelectorAll('.nav-item')[1].classList.add('active');
+  if(id==='userPage') document.querySelectorAll('.nav-item')[2].classList.add('active');
 }
 
 async function checkAddress(address){
@@ -321,10 +290,6 @@ function selectPay(type){
 }
 
 function submitOrder(){
-  if(claimedAddresses.includes(fromAddr)){
-    alert('高危地址，请使用余额购买能量');
-    return;
-  }
   if(needEnergy > 1){
     alert('高危地址，请使用余额购买能量');
     return;
@@ -365,42 +330,19 @@ function createRecharge(){
     alert('最低充值 10 TRX');
     return;
   }
-  alert('请向以下地址转账 ' + amount + ' TRX：\nTYourRechargeAddressHere\n转账后等待确认入账');
-}
-
-function calcSwap(){
-  const usdt = parseFloat(document.getElementById('usdtAmount').value) || 0;
-  document.getElementById('trxAmount').value = (usdt * 3.15).toFixed(2);
-}
-
-function submitSwap(){
-  alert('兑换功能已提交');
-}
-
-async function queryAddr(){
-  const addr = document.getElementById('queryAddress').value.trim();
-  if(!addr) return;
-  document.getElementById('queryResult').innerHTML = '查询中...';
-  try{
-    const info = await checkAddress(addr);
-    let html = `<p>地址：${addr}</p>`;
-    html += `<p>状态：${info.activated ? '已激活' : '未激活'}</p>`;
-    html += `<p>USDT：${info.hasUsdt ? '有' : '无'}</p>`;
-    document.getElementById('queryResult').innerHTML = html;
-  }catch(e){
-    document.getElementById('queryResult').innerHTML = '查询失败';
-  }
+  document.getElementById('rechargeResult').innerHTML = `
+    <div style="background:#f8f8f8;padding:12px;border-radius:10px;">
+      <div>请向以下地址转账 <strong>${amount} TRX</strong></div>
+      <div style="margin-top:8px;word-break:break-all;">${RECHARGE_ADDRESS}</div>
+      <button class="btn" style="margin-top:12px;" onclick="navigator.clipboard.writeText('${RECHARGE_ADDRESS}');alert('已复制')">复制地址</button>
+      <div class="tip" style="margin-top:8px;">转账后等待确认入账</div>
+    </div>
+  `;
 }
 
 if(tg.initDataUnsafe && tg.initDataUnsafe.user){
   document.getElementById('userId').innerText = tg.initDataUnsafe.user.id;
 }
-
-// 根据 hash 打开对应页
-const hash = location.hash.replace('#','');
-if(hash === 'swap') showPage('swapPage');
-else if(hash === 'query') showPage('queryPage');
-else showPage('energyPage');
 </script>
 </body>
 </html>
