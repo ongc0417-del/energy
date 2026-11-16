@@ -7,18 +7,27 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-body{background:#f5f5f5;color:#333;padding:16px}
-.header{background:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;position:sticky;top:0;z-index:100;margin:-16px -16px 16px}
-.header .title{font-size:17px;font-weight:600}
-.header .close{color:#007aff;font-size:16px}
-.section{background:#fff;padding:16px;border-radius:12px}
-.section-title{font-size:15px;font-weight:500;margin-bottom:12px;text-align:center}
-.input-box{background:#f8f8f8;border:1px solid #eee;border-radius:10px;padding:12px;min-height:48px;font-size:15px;width:100%;margin-bottom:12px}
-.btn{background:#e6a23c;color:#fff;border:none;border-radius:25px;padding:14px;font-size:16px;width:100%;margin-top:8px}
-.price{text-align:center;color:#2ecc71;margin-bottom:16px;font-size:15px}
-.order-box{background:#fff9e6;padding:16px;border-radius:12px;margin-top:16px;display:none}
-.addr{word-break:break-all;background:#fff;padding:10px;border-radius:8px;margin:8px 0;font-size:13px}
-.copy-btn{background:#e6a23c;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:13px;margin-top:8px}
+body{background:linear-gradient(135deg,#f3e8ff 0%,#f5f5f5 100%);color:#333;min-height:100vh;padding:16px}
+.header{background:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;position:sticky;top:0;z-index:100;margin:-16px -16px 20px;border-radius:0 0 16px 16px;box-shadow:0 2px 8px rgba(124,58,237,0.1)}
+.header .title{font-size:17px;font-weight:600;color:#7c3aed}
+.header .close{color:#7c3aed;font-size:16px}
+.card{background:#fff;border-radius:20px;padding:24px;box-shadow:0 4px 20px rgba(124,58,237,0.08);margin-bottom:16px}
+.title{font-size:20px;font-weight:700;text-align:center;margin-bottom:8px;background:linear-gradient(90deg,#7c3aed,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#999;font-size:13px;margin-bottom:20px}
+.price-box{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;padding:16px;border-radius:16px;text-align:center;margin-bottom:20px}
+.price-box .label{font-size:12px;opacity:0.9}
+.price-box .value{font-size:22px;font-weight:700;margin-top:4px}
+.input-group{margin-bottom:16px}
+.input-label{font-size:13px;color:#666;margin-bottom:6px;display:block}
+.input-box{background:#f8f8f8;border:2px solid #eee;border-radius:14px;padding:14px;font-size:16px;width:100%;transition:border-color 0.2s}
+.input-box:focus{outline:none;border-color:#7c3aed}
+.btn{background:linear-gradient(90deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:30px;padding:16px;font-size:16px;font-weight:600;width:100%;margin-top:8px;box-shadow:0 4px 15px rgba(124,58,237,0.3);transition:transform 0.1s}
+.btn:active{transform:scale(0.98)}
+.order-box{background:#f3e8ff;padding:20px;border-radius:16px;margin-top:16px;display:none;border:2px solid #7c3aed}
+.order-title{font-weight:700;color:#7c3aed;margin-bottom:12px;font-size:16px}
+.addr-box{background:#fff;padding:14px;border-radius:12px;margin:12px 0;font-size:14px;word-break:break-all;border:1px solid #e9d5ff}
+.copy-btn{background:#7c3aed;color:#fff;border:none;border-radius:20px;padding:10px 20px;font-size:14px;margin-top:8px}
+.tip{font-size:12px;color:#999;margin-top:12px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -29,20 +38,38 @@ body{background:#f5f5f5;color:#333;padding:16px}
   <span></span>
 </div>
 
-<div class="section">
-  <div class="section-title">USDT 换 TRX</div>
-  <div class="price">当前价格 1 USDT ≈ 3.15 TRX</div>
-  <input id="usdtAmount" class="input-box" placeholder="输入 USDT 数量" oninput="calc()">
-  <input id="trxAmount" class="input-box" placeholder="预计获得 TRX" readonly>
-  <input id="receiveAddress" class="input-box" placeholder="接收 TRX 地址">
+<div class="card">
+  <div class="title">USDT 换 TRX</div>
+  <div class="subtitle">实时汇率 · 安全到账</div>
+  
+  <div class="price-box">
+    <div class="label">当前汇率</div>
+    <div class="value">1 USDT ≈ 3.15 TRX</div>
+  </div>
+
+  <div class="input-group">
+    <label class="input-label">兑换数量 (USDT)</label>
+    <input id="usdtAmount" class="input-box" placeholder="输入 USDT 数量" oninput="calc()">
+  </div>
+
+  <div class="input-group">
+    <label class="input-label">预计获得 (TRX)</label>
+    <input id="trxAmount" class="input-box" placeholder="0.00" readonly>
+  </div>
+
+  <div class="input-group">
+    <label class="input-label">接收 TRX 地址</label>
+    <input id="receiveAddress" class="input-box" placeholder="输入你的 TRC20 地址">
+  </div>
+
   <button class="btn" onclick="submitSwap()">立即兑换</button>
 
   <div class="order-box" id="orderBox">
-    <div style="font-weight:600;margin-bottom:8px;">请转账 USDT</div>
+    <div class="order-title">⚡ 请转账 USDT</div>
     <div>请向以下地址转账 <strong id="orderAmount"></strong> USDT（TRC20）</div>
-    <div class="addr" id="swapAddress">TYourSwapReceiveAddressHere</div>
+    <div class="addr-box" id="swapAddress">TYourSwapReceiveAddressHere</div>
     <button class="copy-btn" onclick="copyAddr()">复制地址</button>
-    <div style="font-size:12px;color:#999;margin-top:12px;">转账完成后，TRX 将自动发送到你填写的接收地址。</div>
+    <div class="tip">转账完成后，TRX 将自动发送到你填写的接收地址。</div>
   </div>
 </div>
 
@@ -51,7 +78,7 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
-const SWAP_ADDRESS = 'TYourSwapReceiveAddressHere'; // 改成你的收款地址
+const SWAP_ADDRESS = 'TYourSwapReceiveAddressHere';
 
 function calc(){
   const usdt = parseFloat(document.getElementById('usdtAmount').value) || 0;
