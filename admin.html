@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>能量宝后台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{background:#f5f5f5;color:#333}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:200px;background:#1a1a2e;color:#fff;padding:20px 0}
+.sidebar h2{padding:0 20px;font-size:18px;margin-bottom:20px;color:#7c3aed}
+.sidebar a{display:block;padding:12px 20px;color:#ccc;text-decoration:none;transition:background 0.2s}
+.sidebar a:hover,.sidebar a.active{background:#7c3aed;color:#fff}
+.main{margin-left:200px;padding:20px}
+.header{background:#fff;padding:16px 20px;border-radius:12px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+.header h1{font-size:20px;color:#7c3aed}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+.card .label{font-size:13px;color:#999;margin-bottom:8px}
+.card .value{font-size:28px;font-weight:700;color:#7c3aed}
+.section{background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:20px}
+.section h3{font-size:16px;margin-bottom:16px;color:#333}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #eee}
+th{background:#f8f8f8;font-weight:600;font-size:13px;color:#666}
+.btn{background:#7c3aed;color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px}
+.btn:hover{background:#6d28d9}
+.btn-danger{background:#ff4d4f}
+.btn-danger:hover{background:#ff7875}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tab{padding:8px 16px;border-radius:8px;cursor:pointer;background:#f0f0f0;font-size:14px}
+.tab.active{background:#7c3aed;color:#fff}
+.page{display:none}
+.page.active{display:block}
+input,select{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-right:8px}
+.status-ok{color:#52c41a}
+.status-pending{color:#faad14}
+.status-fail{color:#ff4d4f}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>⚡ 能量宝</h2>
+  <a href="#" class="active" onclick="showPage('dashboard')">数据总览</a>
+  <a href="#" onclick="showPage('users')">用户管理</a>
+  <a href="#" onclick="showPage('orders')">订单管理</a>
+  <a href="#" onclick="showPage('deposits')">充值记录</a>
+  <a href="#" onclick="showPage('addresses')">地址管理</a>
+  <a href="#" onclick="showPage('energy')">发能量</a>
+  <a href="#" onclick="showPage('ads')">广告管理</a>
+  <a href="#" onclick="showPage('settings')">设置</a>
+</div>
+
+<div class="main">
+  <div class="header">
+    <h1 id="pageTitle">数据总览</h1>
+  </div>
+
+  <!-- 数据总览 -->
+  <div class="page active" id="dashboard">
+    <div class="cards">
+      <div class="card">
+        <div class="label">今日用户</div>
+        <div class="value" id="todayUsers">0</div>
+      </div>
+      <div class="card">
+        <div class="label">今日订单</div>
+        <div class="value" id="todayOrders">0</div>
+      </div>
+      <div class="card">
+        <div class="label">今日收入</div>
+        <div class="value" id="todayIncome">0 TRX</div>
+      </div>
+      <div class="card">
+        <div class="label">总用户</div>
+        <div class="value" id="totalUsers">0</div>
+      </div>
+    </div>
+    <div class="section">
+      <h3>最近订单</h3>
+      <table>
+        <thead><tr><th>时间</th><th>用户</th><th>类型</th><th>金额</th><th>状态</th></tr></thead>
+        <tbody id="recentOrders"><tr><td colspan="5" style="text-align:center;color:#999">暂无数据</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 用户管理 -->
+  <div class="page" id="users">
+    <div class="section">
+      <h3>用户列表</h3>
+      <div style="margin-bottom:16px">
+        <input id="userSearch" placeholder="搜索用户ID或地址">
+        <button class="btn" onclick="searchUsers()">搜索</button>
+      </div>
+      <table>
+        <thead><tr><th>用户ID</th><th>余额</th><th>领取次数</th><th>注册时间</th><th>操作</th></tr></thead>
+        <tbody id="userList"><tr><td colspan="5" style="text-align:center;color:#999">暂无数据</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 订单管理 -->
+  <div class="page" id="orders">
+    <div class="section">
+      <h3>订单列表</h3>
+      <div class="tabs">
+        <span class="tab active" onclick="filterOrders('all')">全部</span>
+        <span class="tab" onclick="filterOrders('energy')">能量</span>
+        <span class="tab" onclick="filterOrders('swap')">换TRX</span>
+      </div>
+      <table>
+        <thead><tr><th>订单号</th><th>用户</th><th>类型</th><th>金额</th><th>状态</th><th>时间</th></tr></thead>
+        <tbody id="orderList"><tr><td colspan="6" style="text-align:center;color:#999">暂无数据</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 充值记录 -->
+  <div class="page" id="deposits">
+    <div class="section">
+      <h3>充值记录</h3>
+      <table>
+        <thead><tr><th>时间</th><th>来源地址</th><th>金额</th><th>状态</th><th>用户</th></tr></thead>
+        <tbody id="depositList"><tr><td colspan="5" style="text-align:center;color:#999">暂无数据</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 地址管理 -->
+  <div class="page" id="addresses">
+    <div class="section">
+      <h3>已领取能量的地址</h3>
+      <table>
+        <thead><tr><th>地址</th><th>领取次数</th><th>最后领取</th><th>操作</th></tr></thead>
+        <tbody id="addressList"><tr><td colspan="4" style="text-align:center;color:#999">暂无数据</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 发能量 -->
+  <div class="page" id="energy">
+    <div class="section">
+      <h3>手动发能量</h3>
+      <div style="margin-bottom:16px">
+        <input id="energyAddr" placeholder="输入地址" style="width:300px">
+        <select id="energyCount">
+          <option value="1">1 笔</option>
+          <option value="2">2 笔</option>
+          <option value="5">5 笔</option>
+          <option value="10">10 笔</option>
+        </select>
+        <button class="btn" onclick="sendEnergy()">发送</button>
+      </div>
+      <div id="energyResult" style="color:#52c41a;margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- 广告管理 -->
+  <div class="page" id="ads">
+    <div class="section">
+      <h3>发广告</h3>
+      <div style="margin-bottom:16px">
+        <input id="adText" placeholder="广告内容" style="width:400px">
+        <button class="btn" onclick="sendAd()">发送</button>
+      </div>
+      <h3 style="margin-top:20px">广告历史</h3>
+      <table>
+        <thead><tr><th>内容</th><th>发送时间</th><th>操作</th></tr></thead>
+        <tbody id="adList"><tr><td colspan="3" style="text-align:center;color:#999">暂无广告</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 设置 -->
+  <div class="page" id="settings">
+    <div class="section">
+      <h3>价格设置</h3>
+      <div style="margin-bottom:16px">
+        <label>能量价格（TRX/笔）：</label>
+        <input id="energyPrice" type="number" value="2" style="width:100px">
+      </div>
+      <div style="margin-bottom:16px">
+        <label>换TRX汇率（1 USDT = ? TRX）：</label>
+        <input id="swapRate" type="number" value="3.15" step="0.01" style="width:100px">
+      </div>
+      <div style="margin-bottom:16px">
+        <label>每日免费笔数：</label>
+        <input id="freeCount" type="number" value="3" style="width:100px">
+      </div>
+      <button class="btn" onclick="saveSettings()">保存设置</button>
+      <div id="settingsResult" style="color:#52c41a;margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+  event.target.classList.add('active');
+  const titles = {dashboard:'数据总览',users:'用户管理',orders:'订单管理',deposits:'充值记录',addresses:'地址管理',energy:'发能量',ads:'广告管理',settings:'设置'};
+  document.getElementById('pageTitle').innerText = titles[id] || '后台';
+}
+
+function searchUsers(){
+  alert('搜索功能需要对接后端API');
+}
+
+function filterOrders(type){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function sendEnergy(){
+  const addr = document.getElementById('energyAddr').value;
+  const count = document.getElementById('energyCount').value;
+  if(!addr || !addr.startsWith('T')){
+    alert('请输入有效地址');
+    return;
+  }
+  document.getElementById('energyResult').innerText = `已向 ${addr.slice(0,8)}... 发送 ${count} 笔能量（演示）`;
+}
+
+function sendAd(){
+  const text = document.getElementById('adText').value;
+  if(!text){
+    alert('请输入广告内容');
+    return;
+  }
+  alert('广告已发送（演示）');
+  document.getElementById('adText').value = '';
+}
+
+function saveSettings(){
+  document.getElementById('settingsResult').innerText = '设置已保存（演示）';
+}
+
+// 演示数据
+document.getElementById('todayUsers').innerText = '12';
+document.getElementById('todayOrders').innerText = '36';
+document.getElementById('todayIncome').innerText = '72 TRX';
+document.getElementById('totalUsers').innerText = '256';
+</script>
+</body>
+</html>
