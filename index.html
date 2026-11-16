@@ -11,29 +11,29 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
 .header{background:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;position:sticky;top:0;z-index:100}
 .header .title{font-size:17px;font-weight:600}
 .header .close{color:#007aff;font-size:16px}
-.banner{background:#fff9e6;margin:12px 16px;padding:12px;border-radius:12px;display:flex;align-items:center;justify-content:space-between}
-.banner span{color:#e6a23c;font-size:14px}
-.banner .enter{background:#fff;border:1px solid #e6a23c;color:#e6a23c;padding:6px 16px;border-radius:20px;font-size:14px}
+.banner{background:#f3e8ff;margin:12px 16px;padding:12px;border-radius:12px;display:flex;align-items:center;justify-content:space-between}
+.banner span{color:#7c3aed;font-size:14px}
+.banner .enter{background:#fff;border:1px solid #7c3aed;color:#7c3aed;padding:6px 16px;border-radius:20px;font-size:14px}
 .cards{display:flex;gap:12px;margin:0 16px 16px}
 .card{flex:1;background:#fff;padding:16px;border-radius:12px}
 .card .label{font-size:13px;color:#999;margin-bottom:4px}
 .card .value{font-size:22px;font-weight:600}
 .card .sub{font-size:12px;color:#999;margin-top:4px}
-.recharge-btn{background:#fff;border:1px solid #e6a23c;color:#e6a23c;padding:6px 12px;border-radius:16px;font-size:13px;float:right;margin-top:-4px}
+.recharge-btn{background:#fff;border:1px solid #7c3aed;color:#7c3aed;padding:6px 12px;border-radius:16px;font-size:13px;float:right;margin-top:-4px}
 .section{background:#fff;margin:0 16px 16px;padding:16px;border-radius:12px}
 .section-title{font-size:15px;font-weight:500;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
 .paste{color:#007aff;font-size:14px}
 .input-box{background:#f8f8f8;border:1px solid #eee;border-radius:10px;padding:12px;min-height:48px;font-size:15px;word-break:break-all}
-.input-box.active{border-color:#e6a23c}
+.input-box.active{border-color:#7c3aed}
 .check{color:#52c41a;font-size:13px;margin-left:8px}
 .check-danger{color:#ff4d4f;font-size:13px;margin-left:8px;font-weight:600}
 .tip{font-size:13px;color:#999;margin-top:8px;line-height:1.5}
 .pay-options{display:flex;gap:12px;margin-top:12px}
 .pay-option{flex:1;border:1px solid #eee;border-radius:12px;padding:12px;text-align:center;cursor:pointer}
-.pay-option.active{border-color:#e6a23c;background:#fff9e6}
+.pay-option.active{border-color:#7c3aed;background:#f3e8ff}
 .pay-option .name{font-size:14px;margin-bottom:4px}
 .pay-option .desc{font-size:12px;color:#999}
-.btn{background:#e6a23c;color:#fff;border:none;border-radius:25px;padding:14px;font-size:16px;width:100%;margin-top:16px}
+.btn{background:#7c3aed;color:#fff;border:none;border-radius:25px;padding:14px;font-size:16px;width:100%;margin-top:16px}
 .btn:disabled{background:#ddd;color:#999}
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:200}
 .modal-content{background:#fff;margin:20px;padding:24px;border-radius:16px;max-width:340px;width:100%}
@@ -42,7 +42,7 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
 .modal .btn{margin-top:8px}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1px solid #eee;padding:8px 0;padding-bottom:env(safe-area-inset-bottom)}
 .nav-item{flex:1;text-align:center;font-size:12px;color:#999;padding:4px}
-.nav-item.active{color:#e6a23c}
+.nav-item.active{color:#7c3aed}
 .nav-item .icon{font-size:20px;margin-bottom:2px}
 .success{text-align:center;padding:40px 20px}
 .success .icon{font-size:48px;color:#52c41a;margin-bottom:16px}
@@ -57,7 +57,7 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
 .amount-row{display:flex;align-items:center;justify-content:space-between;margin:12px 0}
 .amount-big{font-size:24px;font-weight:700}
 .copy-icon{background:#f5f5f5;border:none;border-radius:6px;padding:6px 10px;cursor:pointer}
-.timer{color:#e6a23c;font-weight:600;margin:12px 0}
+.timer{color:#7c3aed;font-weight:600;margin:12px 0}
 .change-btn{background:#fff;border:1px solid #ddd;color:#333;border-radius:20px;padding:10px 20px;margin-top:12px}
 .menu-item{background:#fff;padding:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0f0f0}
 .menu-item:first-child{border-radius:12px 12px 0 0}
@@ -156,7 +156,7 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
   <div class="section">
     <div class="label">用户余额</div>
     <div class="value" style="font-size:28px;margin:8px 0" id="balanceDisplay">0.00 TRX</div>
-    <div style="background:#fff9e6;padding:12px;border-radius:10px;font-size:13px;color:#e6a23c;margin:12px 0">⚠️ 只有 TRX（TRON 网络）会计入你的余额。</div>
+    <div style="background:#f3e8ff;padding:12px;border-radius:10px;font-size:13px;color:#7c3aed;margin:12px 0">⚠️ 只有 TRX（TRON 网络）会计入你的余额。</div>
     <div id="rechargeForm">
       <div class="label">充值金额（TRX）</div>
       <input type="number" id="rechargeAmount" placeholder="最低 10 TRX" style="width:100%;padding:12px;border:1px solid #eee;border-radius:10px;margin:8px 0;font-size:16px">
@@ -201,7 +201,7 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
   <div class="section">
     <div class="section-title">订单记录</div>
     <div style="display:flex;gap:8px;margin-bottom:16px;">
-      <span style="background:#fff9e6;color:#e6a23c;padding:6px 12px;border-radius:16px;font-size:13px;">全部</span>
+      <span style="background:#f3e8ff;color:#7c3aed;padding:6px 12px;border-radius:16px;font-size:13px;">全部</span>
       <span style="background:#f5f5f5;color:#999;padding:6px 12px;border-radius:16px;font-size:13px;">有效中</span>
       <span style="background:#f5f5f5;color:#999;padding:6px 12px;border-radius:16px;font-size:13px;">已到期</span>
     </div>
@@ -422,7 +422,7 @@ function createRecharge(){
         <span class="amount-big">${unique} TRX</span>
         <button class="copy-icon" onclick="navigator.clipboard.writeText('${unique}');alert('已复制')">📋</button>
       </div>
-      <div class="tip" style="color:#e6a23c;">金额必须完全一致（含小数），否则无法自动入账。</div>
+      <div class="tip" style="color:#7c3aed;">金额必须完全一致（含小数），否则无法自动入账。</div>
       <div class="qr-box"><img src="${qrUrl}" alt="QR"></div>
       <div class="addr-box" style="text-align:left;">
         <span class="copy-btn" onclick="navigator.clipboard.writeText('${RECHARGE_ADDRESS}');alert('已复制')">复制</span>
