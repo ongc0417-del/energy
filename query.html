@@ -7,23 +7,46 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-body{background:#f5f5f5;color:#333;padding:16px}
-.card{background:#fff;border-radius:12px;padding:20px}
-h3{text-align:center;margin-bottom:16px}
-.input{width:100%;padding:12px;border:1px solid #eee;border-radius:10px;margin:8px 0;font-size:15px}
-.btn{width:100%;padding:14px;background:#e6a23c;color:#fff;border:none;border-radius:25px;font-size:16px;margin-top:8px}
-#result{margin-top:16px;font-size:14px;line-height:1.8;background:#f8f8f8;padding:12px;border-radius:10px}
-.item{display:flex;justify-content:space-between;margin:6px 0}
-.label{color:#999}
+body{background:linear-gradient(135deg,#f3e8ff 0%,#f5f5f5 100%);color:#333;min-height:100vh;padding:16px}
+.header{background:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;position:sticky;top:0;z-index:100;margin:-16px -16px 20px;border-radius:0 0 16px 16px;box-shadow:0 2px 8px rgba(124,58,237,0.1)}
+.header .title{font-size:17px;font-weight:600;color:#7c3aed}
+.header .close{color:#7c3aed;font-size:16px}
+.card{background:#fff;border-radius:20px;padding:24px;box-shadow:0 4px 20px rgba(124,58,237,0.08)}
+.title{font-size:20px;font-weight:700;text-align:center;margin-bottom:8px;background:linear-gradient(90deg,#7c3aed,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#999;font-size:13px;margin-bottom:20px}
+.input-box{background:#f8f8f8;border:2px solid #eee;border-radius:14px;padding:14px;font-size:15px;width:100%;margin-bottom:12px;transition:border-color 0.2s}
+.input-box:focus{outline:none;border-color:#7c3aed}
+.btn{background:linear-gradient(90deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:30px;padding:16px;font-size:16px;font-weight:600;width:100%;box-shadow:0 4px 15px rgba(124,58,237,0.3);transition:transform 0.1s}
+.btn:active{transform:scale(0.98)}
+.result{margin-top:20px;background:#f8f8f8;border-radius:16px;padding:16px;display:none}
+.result.show{display:block}
+.result-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eee}
+.result-item:last-child{border-bottom:none}
+.result-label{color:#999;font-size:14px}
+.result-value{font-weight:600;font-size:15px}
+.status-ok{color:#52c41a}
+.status-bad{color:#ff4d4f}
+.loading{text-align:center;color:#7c3aed;padding:20px;font-size:14px}
 </style>
 </head>
 <body>
-<div class="card">
-  <h3>查地址</h3>
-  <input id="addr" class="input" placeholder="输入 TRC20 地址">
-  <button class="btn" onclick="query()">查询</button>
-  <div id="result"></div>
+
+<div class="header">
+  <span class="close" onclick="tg.close()">关闭</span>
+  <span class="title">查地址</span>
+  <span></span>
 </div>
+
+<div class="card">
+  <div class="title">查询 TRC20 地址</div>
+  <div class="subtitle">实时查询激活状态和余额</div>
+  
+  <input id="addr" class="input-box" placeholder="输入 TRC20 地址">
+  <button class="btn" onclick="query()">查询</button>
+  
+  <div id="result" class="result"></div>
+</div>
+
 <script>
 const tg = window.Telegram.WebApp;
 tg.ready();
@@ -35,14 +58,17 @@ async function query(){
     alert('请输入有效的 TRC20 地址');
     return;
   }
-  document.getElementById('result').innerHTML = '查询中...';
+  const resultEl = document.getElementById('result');
+  resultEl.className = 'result show';
+  resultEl.innerHTML = '<div class="loading">查询中...</div>';
+  
   try{
     const res = await fetch(`https://apilist.tronscanapi.com/api/accountv2?address=${addr}`);
     if(!res.ok) throw new Error('API error');
     const data = await res.json();
     
     let trx = ((data.balance || 0) / 1e6).toFixed(2);
-    let usdt = 0;
+    let usdt = '0.00';
     let activated = data.balance !== undefined;
     
     if(data.trc20token_balances){
@@ -50,14 +76,26 @@ async function query(){
       if(u) usdt = (parseFloat(u.balance) / 1e6).toFixed(2);
     }
     
-    document.getElementById('result').innerHTML = `
-      <div class="item"><span class="label">地址</span><span>${addr.slice(0,8)}...${addr.slice(-6)}</span></div>
-      <div class="item"><span class="label">状态</span><span>${activated ? '已激活' : '未激活'}</span></div>
-      <div class="item"><span class="label">TRX</span><span>${trx}</span></div>
-      <div class="item"><span class="label">USDT</span><span>${usdt}</span></div>
+    resultEl.innerHTML = `
+      <div class="result-item">
+        <span class="result-label">地址</span>
+        <span class="result-value">${addr.slice(0,8)}...${addr.slice(-6)}</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">状态</span>
+        <span class="result-value ${activated ? 'status-ok' : 'status-bad'}">${activated ? '✓ 已激活' : '✗ 未激活'}</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">TRX 余额</span>
+        <span class="result-value">${trx}</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">USDT 余额</span>
+        <span class="result-value">${usdt}</span>
+      </div>
     `;
   }catch(e){
-    document.getElementById('result').innerHTML = '<span style="color:#ff4d4f">查询失败，请稍后重试</span>';
+    resultEl.innerHTML = '<div class="loading" style="color:#ff4d4f">查询失败，请稍后重试</div>';
   }
 }
 </script>
