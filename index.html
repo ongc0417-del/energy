@@ -52,6 +52,13 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
 .page{display:none}
 .page.active{display:block}
 .warning-box{background:#fff2f0;border:1px solid #ffccc7;color:#ff4d4f;padding:12px;border-radius:10px;margin-top:12px;font-size:14px;line-height:1.5}
+.qr-box{text-align:center;margin:16px 0}
+.qr-box img{width:180px;height:180px;border:1px solid #eee;border-radius:8px}
+.amount-row{display:flex;align-items:center;justify-content:space-between;margin:12px 0}
+.amount-big{font-size:24px;font-weight:700}
+.copy-icon{background:#f5f5f5;border:none;border-radius:6px;padding:6px 10px;cursor:pointer}
+.timer{color:#e6a23c;font-weight:600;margin:12px 0}
+.change-btn{background:#fff;border:1px solid #ddd;color:#333;border-radius:20px;padding:10px 20px;margin-top:12px}
 </style>
 </head>
 <body>
@@ -144,13 +151,15 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
 <div class="page" id="rechargePage">
   <div class="section">
     <div class="label">用户余额</div>
-    <div class="value" style="font-size:28px;margin:8px 0">0.00 TRX</div>
+    <div class="value" style="font-size:28px;margin:8px 0" id="balanceDisplay">0.00 TRX</div>
     <div style="background:#fff9e6;padding:12px;border-radius:10px;font-size:13px;color:#e6a23c;margin:12px 0">⚠️ 只有 TRX（TRON 网络）会计入你的余额。</div>
-    <div class="label">充值金额（TRX）</div>
-    <input type="number" id="rechargeAmount" placeholder="最低 10 TRX" style="width:100%;padding:12px;border:1px solid #eee;border-radius:10px;margin:8px 0;font-size:16px">
-    <button class="btn" onclick="createRecharge()">生成充值地址</button>
-    <div class="tip">最低充值金额 10.00 TRX。低于此金额会累积，达到后一并入账。</div>
-    <div id="rechargeResult" style="margin-top:16px;font-size:14px;"></div>
+    <div id="rechargeForm">
+      <div class="label">充值金额（TRX）</div>
+      <input type="number" id="rechargeAmount" placeholder="最低 10 TRX" style="width:100%;padding:12px;border:1px solid #eee;border-radius:10px;margin:8px 0;font-size:16px">
+      <button class="btn" onclick="createRecharge()">生成充值金额</button>
+      <div class="tip">最低充值金额 10.00 TRX。低于此金额会累积，达到后一并入账。</div>
+    </div>
+    <div id="rechargeResult" style="display:none;"></div>
   </div>
   <div class="section">
     <div class="section-title">充值记录</div>
@@ -185,7 +194,7 @@ tg.ready();
 tg.expand();
 
 const USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
-const RECHARGE_ADDRESS = 'TYourRechargeAddressHere';
+const RECHARGE_ADDRESS = 'TYourRechargeAddressHere'; // 改成你的充值地址
 
 let freeLeft = 3;
 let balance = 0;
@@ -195,6 +204,7 @@ let payType = 'free';
 let needEnergy = 1;
 let isHighRisk = false;
 let claimedAddresses = JSON.parse(localStorage.getItem('claimedAddresses') || '[]');
+let timerInterval = null;
 
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -239,7 +249,6 @@ function updateRiskUI(info){
         需要余额：<strong>${needTrx} TRX</strong>
       </div>
     `;
-    // 强制选余额支付
     selectPay('balance');
     document.getElementById('payFree').style.opacity = '0.5';
     document.getElementById('payFree').style.pointerEvents = 'none';
@@ -354,19 +363,56 @@ function copyTo(){
 }
 
 function createRecharge(){
-  const amount = document.getElementById('rechargeAmount').value;
-  if(!amount || amount < 10){
+  const base = parseFloat(document.getElementById('rechargeAmount').value);
+  if(!base || base < 10){
     alert('最低充值 10 TRX');
     return;
   }
+  const unique = (base + Math.random() * 0.999).toFixed(3);
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(RECHARGE_ADDRESS)}`;
+  
+  document.getElementById('rechargeForm').style.display = 'none';
+  document.getElementById('rechargeResult').style.display = 'block';
   document.getElementById('rechargeResult').innerHTML = `
-    <div style="background:#f8f8f8;padding:12px;border-radius:10px;">
-      <div>请向以下地址转账 <strong>${amount} TRX</strong></div>
-      <div style="margin-top:8px;word-break:break-all;">${RECHARGE_ADDRESS}</div>
-      <button class="btn" style="margin-top:12px;" onclick="navigator.clipboard.writeText('${RECHARGE_ADDRESS}');alert('已复制')">复制地址</button>
-      <div class="tip" style="margin-top:8px;">转账后等待确认入账</div>
+    <div style="text-align:center;">
+      <div style="font-size:13px;color:#999;margin-bottom:8px;">请转入以下金额</div>
+      <div class="amount-row" style="justify-content:center;gap:12px;">
+        <span class="amount-big">${unique} TRX</span>
+        <button class="copy-icon" onclick="navigator.clipboard.writeText('${unique}');alert('已复制')">📋</button>
+      </div>
+      <div class="tip" style="color:#e6a23c;">金额必须完全一致（含小数），否则无法自动入账。</div>
+      <div class="qr-box"><img src="${qrUrl}" alt="QR"></div>
+      <div class="addr-box" style="text-align:left;">
+        <span class="copy-btn" onclick="navigator.clipboard.writeText('${RECHARGE_ADDRESS}');alert('已复制')">复制</span>
+        ${RECHARGE_ADDRESS}
+      </div>
+      <div class="timer" id="timer">30:00 内有效</div>
+      <button class="change-btn" onclick="resetRecharge()">更改金额</button>
     </div>
   `;
+  startTimer(30 * 60);
+}
+
+function startTimer(seconds){
+  if(timerInterval) clearInterval(timerInterval);
+  let left = seconds;
+  timerInterval = setInterval(()=>{
+    left--;
+    const m = Math.floor(left / 60).toString().padStart(2,'0');
+    const s = (left % 60).toString().padStart(2,'0');
+    const el = document.getElementById('timer');
+    if(el) el.innerText = `${m}:${s} 内有效`;
+    if(left <= 0){
+      clearInterval(timerInterval);
+      if(el) el.innerText = '已过期，请重新生成';
+    }
+  }, 1000);
+}
+
+function resetRecharge(){
+  if(timerInterval) clearInterval(timerInterval);
+  document.getElementById('rechargeForm').style.display = 'block';
+  document.getElementById('rechargeResult').style.display = 'none';
 }
 
 if(tg.initDataUnsafe && tg.initDataUnsafe.user){
