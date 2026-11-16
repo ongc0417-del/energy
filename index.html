@@ -262,14 +262,21 @@ function showPage(id){
 
 async function checkAddress(address){
   try{
-    const res = await fetch(`https://apilist.tronscanapi.com/api/accountv2?address=${address}`);
-    const data = await res.json();
+    const res = await fetch(`https://api.trongrid.io/v1/accounts/${address}`);
+    const json = await res.json();
+    if(!json.data || json.data.length === 0){
+      return {hasUsdt: false, activated: false};
+    }
+    const data = json.data[0];
     let hasUsdt = false;
-    let activated = false;
-    if(data && data.balance !== undefined) activated = true;
-    if(data && data.trc20token_balances){
-      const usdt = data.trc20token_balances.find(t => t.tokenId === USDT_CONTRACT || t.tokenAbbr === 'USDT');
-      if(usdt && parseFloat(usdt.balance) > 0) hasUsdt = true;
+    let activated = true;
+    if(data.trc20 && Array.isArray(data.trc20)){
+      for(const t of data.trc20){
+        if(t[USDT_CONTRACT] && parseFloat(t[USDT_CONTRACT]) > 0){
+          hasUsdt = true;
+          break;
+        }
+      }
     }
     return {hasUsdt, activated};
   }catch(e){
