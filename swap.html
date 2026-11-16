@@ -16,6 +16,9 @@ body{background:#f5f5f5;color:#333;padding:16px}
 .input-box{background:#f8f8f8;border:1px solid #eee;border-radius:10px;padding:12px;min-height:48px;font-size:15px;width:100%;margin-bottom:12px}
 .btn{background:#e6a23c;color:#fff;border:none;border-radius:25px;padding:14px;font-size:16px;width:100%;margin-top:8px}
 .price{text-align:center;color:#2ecc71;margin-bottom:16px;font-size:15px}
+.order-box{background:#fff9e6;padding:16px;border-radius:12px;margin-top:16px;display:none}
+.addr{word-break:break-all;background:#fff;padding:10px;border-radius:8px;margin:8px 0;font-size:13px}
+.copy-btn{background:#e6a23c;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:13px;margin-top:8px}
 </style>
 </head>
 <body>
@@ -33,6 +36,14 @@ body{background:#f5f5f5;color:#333;padding:16px}
   <input id="trxAmount" class="input-box" placeholder="预计获得 TRX" readonly>
   <input id="receiveAddress" class="input-box" placeholder="接收 TRX 地址">
   <button class="btn" onclick="submitSwap()">立即兑换</button>
+
+  <div class="order-box" id="orderBox">
+    <div style="font-weight:600;margin-bottom:8px;">请转账 USDT</div>
+    <div>请向以下地址转账 <strong id="orderAmount"></strong> USDT（TRC20）</div>
+    <div class="addr" id="swapAddress">TYourSwapReceiveAddressHere</div>
+    <button class="copy-btn" onclick="copyAddr()">复制地址</button>
+    <div style="font-size:12px;color:#999;margin-top:12px;">转账完成后，TRX 将自动发送到你填写的接收地址。</div>
+  </div>
 </div>
 
 <script>
@@ -40,18 +51,32 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
+const SWAP_ADDRESS = 'TYourSwapReceiveAddressHere'; // 改成你的收款地址
+
 function calc(){
   const usdt = parseFloat(document.getElementById('usdtAmount').value) || 0;
   document.getElementById('trxAmount').value = (usdt * 3.15).toFixed(2);
 }
 
 function submitSwap(){
+  const amount = document.getElementById('usdtAmount').value;
   const addr = document.getElementById('receiveAddress').value.trim();
-  if(!addr){
-    alert('请填写接收地址');
+  if(!amount || amount <= 0){
+    alert('请输入兑换数量');
     return;
   }
-  alert('兑换已提交');
+  if(!addr || !addr.startsWith('T')){
+    alert('请填写有效的接收 TRX 地址');
+    return;
+  }
+  document.getElementById('orderAmount').innerText = amount;
+  document.getElementById('swapAddress').innerText = SWAP_ADDRESS;
+  document.getElementById('orderBox').style.display = 'block';
+}
+
+function copyAddr(){
+  navigator.clipboard.writeText(SWAP_ADDRESS);
+  alert('已复制');
 }
 </script>
 </body>
