@@ -7,61 +7,62 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-body{background:#f5f5f5;color:#333;padding-bottom:70px}
-.header{background:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;position:sticky;top:0;z-index:100}
-.header .title{font-size:17px;font-weight:600}
-.header .close{color:#007aff;font-size:16px}
-.banner{background:#f3e8ff;margin:12px 16px;padding:12px;border-radius:12px;display:flex;align-items:center;justify-content:space-between}
-.banner span{color:#7c3aed;font-size:14px}
-.banner .enter{background:#fff;border:1px solid #7c3aed;color:#7c3aed;padding:6px 16px;border-radius:20px;font-size:14px}
+body{background:linear-gradient(180deg,#f3e8ff 0%,#f5f5f5 30%);color:#333;padding-bottom:70px;min-height:100vh}
+.header{background:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(124,58,237,0.08)}
+.header .title{font-size:17px;font-weight:600;color:#7c3aed}
+.header .close{color:#7c3aed;font-size:16px}
+.banner{background:linear-gradient(90deg,#7c3aed,#a855f7);margin:12px 16px;padding:14px 16px;border-radius:16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 15px rgba(124,58,237,0.25)}
+.banner span{color:#fff;font-size:14px}
+.banner .enter{background:#fff;border:none;color:#7c3aed;padding:6px 16px;border-radius:20px;font-size:14px;font-weight:600}
 .cards{display:flex;gap:12px;margin:0 16px 16px}
-.card{flex:1;background:#fff;padding:16px;border-radius:12px}
+.card{flex:1;background:#fff;padding:16px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,0.06)}
 .card .label{font-size:13px;color:#999;margin-bottom:4px}
-.card .value{font-size:22px;font-weight:600}
+.card .value{font-size:22px;font-weight:700;background:linear-gradient(90deg,#7c3aed,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .card .sub{font-size:12px;color:#999;margin-top:4px}
-.recharge-btn{background:#fff;border:1px solid #7c3aed;color:#7c3aed;padding:6px 12px;border-radius:16px;font-size:13px;float:right;margin-top:-4px}
-.section{background:#fff;margin:0 16px 16px;padding:16px;border-radius:12px}
-.section-title{font-size:15px;font-weight:500;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
-.paste{color:#007aff;font-size:14px}
-.input-box{background:#f8f8f8;border:1px solid #eee;border-radius:10px;padding:12px;min-height:48px;font-size:15px;word-break:break-all}
-.input-box.active{border-color:#7c3aed}
-.check{color:#52c41a;font-size:13px;margin-left:8px}
+.recharge-btn{background:#fff;border:2px solid #7c3aed;color:#7c3aed;padding:6px 12px;border-radius:16px;font-size:13px;float:right;margin-top:-4px;font-weight:600}
+.section{background:#fff;margin:0 16px 16px;padding:16px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,0.06)}
+.section-title{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.paste{color:#7c3aed;font-size:14px;font-weight:600}
+.input-box{background:#f8f8f8;border:2px solid #eee;border-radius:14px;padding:14px;min-height:48px;font-size:15px;word-break:break-all;transition:border-color 0.2s}
+.input-box.active{border-color:#7c3aed;background:#faf5ff}
+.check{color:#52c41a;font-size:13px;margin-left:8px;font-weight:600}
 .check-danger{color:#ff4d4f;font-size:13px;margin-left:8px;font-weight:600}
 .tip{font-size:13px;color:#999;margin-top:8px;line-height:1.5}
 .pay-options{display:flex;gap:12px;margin-top:12px}
-.pay-option{flex:1;border:1px solid #eee;border-radius:12px;padding:12px;text-align:center;cursor:pointer}
-.pay-option.active{border-color:#7c3aed;background:#f3e8ff}
-.pay-option .name{font-size:14px;margin-bottom:4px}
+.pay-option{flex:1;border:2px solid #eee;border-radius:14px;padding:14px;text-align:center;cursor:pointer;transition:all 0.2s}
+.pay-option.active{border-color:#7c3aed;background:linear-gradient(135deg,#f3e8ff,#faf5ff);box-shadow:0 2px 8px rgba(124,58,237,0.15)}
+.pay-option .name{font-size:14px;margin-bottom:4px;font-weight:600}
 .pay-option .desc{font-size:12px;color:#999}
-.btn{background:#7c3aed;color:#fff;border:none;border-radius:25px;padding:14px;font-size:16px;width:100%;margin-top:16px}
-.btn:disabled{background:#ddd;color:#999}
+.btn{background:linear-gradient(90deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:30px;padding:16px;font-size:16px;font-weight:600;width:100%;margin-top:16px;box-shadow:0 4px 15px rgba(124,58,237,0.3);transition:transform 0.1s}
+.btn:active{transform:scale(0.98)}
+.btn:disabled{background:#ddd;color:#999;box-shadow:none}
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:200}
-.modal-content{background:#fff;margin:20px;padding:24px;border-radius:16px;max-width:340px;width:100%}
-.modal h3{font-size:18px;margin-bottom:16px;text-align:center}
+.modal-content{background:#fff;margin:20px;padding:24px;border-radius:20px;max-width:340px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
+.modal h3{font-size:18px;margin-bottom:16px;text-align:center;color:#7c3aed}
 .modal ol{padding-left:20px;margin-bottom:16px;line-height:1.8;font-size:14px}
 .modal .btn{margin-top:8px}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1px solid #eee;padding:8px 0;padding-bottom:env(safe-area-inset-bottom)}
-.nav-item{flex:1;text-align:center;font-size:12px;color:#999;padding:4px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1px solid #eee;padding:8px 0;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 10px rgba(0,0,0,0.05)}
+.nav-item{flex:1;text-align:center;font-size:12px;color:#999;padding:4px;transition:color 0.2s}
 .nav-item.active{color:#7c3aed}
-.nav-item .icon{font-size:20px;margin-bottom:2px}
+.nav-item .icon{font-size:22px;margin-bottom:2px}
 .success{text-align:center;padding:40px 20px}
-.success .icon{font-size:48px;color:#52c41a;margin-bottom:16px}
-.success h2{font-size:20px;margin-bottom:20px}
-.addr-box{background:#f8f8f8;padding:12px;border-radius:10px;margin:8px 0;text-align:left;font-size:14px;word-break:break-all}
-.copy-btn{color:#007aff;font-size:13px;float:right}
+.success .icon{font-size:64px;color:#52c41a;margin-bottom:16px}
+.success h2{font-size:22px;margin-bottom:20px;color:#333}
+.addr-box{background:#f8f8f8;padding:14px;border-radius:12px;margin:8px 0;text-align:left;font-size:14px;word-break:break-all;border:1px solid #eee}
+.copy-btn{color:#7c3aed;font-size:13px;float:right;font-weight:600}
 .page{display:none}
 .page.active{display:block}
-.warning-box{background:#fff2f0;border:1px solid #ffccc7;color:#ff4d4f;padding:12px;border-radius:10px;margin-top:12px;font-size:14px;line-height:1.5}
+.warning-box{background:#fff2f0;border:2px solid #ffccc7;color:#ff4d4f;padding:14px;border-radius:14px;margin-top:12px;font-size:14px;line-height:1.5}
 .qr-box{text-align:center;margin:16px 0}
-.qr-box img{width:180px;height:180px;border:1px solid #eee;border-radius:8px}
+.qr-box img{width:180px;height:180px;border:2px solid #e9d5ff;border-radius:12px}
 .amount-row{display:flex;align-items:center;justify-content:space-between;margin:12px 0}
-.amount-big{font-size:24px;font-weight:700}
-.copy-icon{background:#f5f5f5;border:none;border-radius:6px;padding:6px 10px;cursor:pointer}
-.timer{color:#7c3aed;font-weight:600;margin:12px 0}
-.change-btn{background:#fff;border:1px solid #ddd;color:#333;border-radius:20px;padding:10px 20px;margin-top:12px}
+.amount-big{font-size:26px;font-weight:700;color:#7c3aed}
+.copy-icon{background:#f3e8ff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer}
+.timer{color:#7c3aed;font-weight:700;margin:12px 0;font-size:16px}
+.change-btn{background:#fff;border:2px solid #7c3aed;color:#7c3aed;border-radius:25px;padding:12px 24px;margin-top:12px;font-weight:600}
 .menu-item{background:#fff;padding:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0f0f0}
-.menu-item:first-child{border-radius:12px 12px 0 0}
-.menu-item:last-child{border-radius:0 0 12px 12px;border-bottom:none}
+.menu-item:first-child{border-radius:16px 16px 0 0}
+.menu-item:last-child{border-radius:0 0 16px 16px;border-bottom:none}
 .menu-arrow{color:#ccc}
 </style>
 </head>
@@ -156,10 +157,10 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
   <div class="section">
     <div class="label">用户余额</div>
     <div class="value" style="font-size:28px;margin:8px 0" id="balanceDisplay">0.00 TRX</div>
-    <div style="background:#f3e8ff;padding:12px;border-radius:10px;font-size:13px;color:#7c3aed;margin:12px 0">⚠️ 只有 TRX（TRON 网络）会计入你的余额。</div>
+    <div style="background:#f3e8ff;padding:12px;border-radius:12px;font-size:13px;color:#7c3aed;margin:12px 0">⚠️ 只有 TRX（TRON 网络）会计入你的余额。</div>
     <div id="rechargeForm">
       <div class="label">充值金额（TRX）</div>
-      <input type="number" id="rechargeAmount" placeholder="最低 10 TRX" style="width:100%;padding:12px;border:1px solid #eee;border-radius:10px;margin:8px 0;font-size:16px">
+      <input type="number" id="rechargeAmount" placeholder="最低 10 TRX" style="width:100%;padding:14px;border:2px solid #eee;border-radius:14px;margin:8px 0;font-size:16px">
       <button class="btn" onclick="createRecharge()">生成充值金额</button>
       <div class="tip">最低充值金额 10.00 TRX。低于此金额会累积，达到后一并入账。</div>
     </div>
@@ -220,7 +221,7 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
       <div class="addr-box" id="successTo"><span class="copy-btn" onclick="copyTo()">复制</span><span id="successToText"></span></div>
     </div>
     <p style="font-size:13px;color:#999;margin-bottom:20px">请复制对方收款地址后，点击“完成”，然后返回钱包进行转账即可。</p>
-    <button class="btn" style="background:#52c41a" onclick="showPage('energyPage')">完成</button>
+    <button class="btn" style="background:linear-gradient(90deg,#52c41a,#73d13d)" onclick="showPage('energyPage')">完成</button>
   </div>
 </div>
 
