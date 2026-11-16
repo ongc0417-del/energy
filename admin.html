@@ -57,7 +57,6 @@ input,select{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:
     <h1 id="pageTitle">数据总览</h1>
   </div>
 
-  <!-- 数据总览 -->
   <div class="page active" id="dashboard">
     <div class="cards">
       <div class="card">
@@ -81,65 +80,60 @@ input,select{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:
       <h3>最近订单</h3>
       <table>
         <thead><tr><th>时间</th><th>用户</th><th>类型</th><th>金额</th><th>状态</th></tr></thead>
-        <tbody id="recentOrders"><tr><td colspan="5" style="text-align:center;color:#999">暂无数据</td></tr></tbody>
+        <tbody id="recentOrders"><tr><td colspan="5" style="text-align:center;color:#999">加载中...</td></tr></tbody>
       </table>
     </div>
   </div>
 
-  <!-- 用户管理 -->
   <div class="page" id="users">
     <div class="section">
       <h3>用户列表</h3>
       <div style="margin-bottom:16px">
-        <input id="userSearch" placeholder="搜索用户ID或地址">
-        <button class="btn" onclick="searchUsers()">搜索</button>
+        <input id="userSearch" placeholder="搜索用户ID">
+        <button class="btn" onclick="loadUsers()">搜索</button>
       </div>
       <table>
-        <thead><tr><th>用户ID</th><th>余额</th><th>领取次数</th><th>注册时间</th><th>操作</th></tr></thead>
-        <tbody id="userList"><tr><td colspan="5" style="text-align:center;color:#999">暂无数据</td></tr></tbody>
+        <thead><tr><th>用户ID</th><th>余额</th><th>领取次数</th><th>注册时间</th></tr></thead>
+        <tbody id="userList"><tr><td colspan="4" style="text-align:center;color:#999">加载中...</td></tr></tbody>
       </table>
     </div>
   </div>
 
-  <!-- 订单管理 -->
   <div class="page" id="orders">
     <div class="section">
       <h3>订单列表</h3>
       <div class="tabs">
-        <span class="tab active" onclick="filterOrders('all')">全部</span>
-        <span class="tab" onclick="filterOrders('energy')">能量</span>
-        <span class="tab" onclick="filterOrders('swap')">换TRX</span>
+        <span class="tab active" onclick="loadOrders('all')">全部</span>
+        <span class="tab" onclick="loadOrders('energy')">能量</span>
+        <span class="tab" onclick="loadOrders('swap')">换TRX</span>
       </div>
       <table>
         <thead><tr><th>订单号</th><th>用户</th><th>类型</th><th>金额</th><th>状态</th><th>时间</th></tr></thead>
-        <tbody id="orderList"><tr><td colspan="6" style="text-align:center;color:#999">暂无数据</td></tr></tbody>
+        <tbody id="orderList"><tr><td colspan="6" style="text-align:center;color:#999">加载中...</td></tr></tbody>
       </table>
     </div>
   </div>
 
-  <!-- 充值记录 -->
   <div class="page" id="deposits">
     <div class="section">
       <h3>充值记录</h3>
       <table>
         <thead><tr><th>时间</th><th>来源地址</th><th>金额</th><th>状态</th><th>用户</th></tr></thead>
-        <tbody id="depositList"><tr><td colspan="5" style="text-align:center;color:#999">暂无数据</td></tr></tbody>
+        <tbody id="depositList"><tr><td colspan="5" style="text-align:center;color:#999">加载中...</td></tr></tbody>
       </table>
     </div>
   </div>
 
-  <!-- 地址管理 -->
   <div class="page" id="addresses">
     <div class="section">
       <h3>已领取能量的地址</h3>
       <table>
-        <thead><tr><th>地址</th><th>领取次数</th><th>最后领取</th><th>操作</th></tr></thead>
-        <tbody id="addressList"><tr><td colspan="4" style="text-align:center;color:#999">暂无数据</td></tr></tbody>
+        <thead><tr><th>地址</th><th>领取次数</th><th>最后领取</th></tr></thead>
+        <tbody id="addressList"><tr><td colspan="3" style="text-align:center;color:#999">加载中...</td></tr></tbody>
       </table>
     </div>
   </div>
 
-  <!-- 发能量 -->
   <div class="page" id="energy">
     <div class="section">
       <h3>手动发能量</h3>
@@ -157,7 +151,6 @@ input,select{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:
     </div>
   </div>
 
-  <!-- 广告管理 -->
   <div class="page" id="ads">
     <div class="section">
       <h3>发广告</h3>
@@ -168,12 +161,11 @@ input,select{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:
       <h3 style="margin-top:20px">广告历史</h3>
       <table>
         <thead><tr><th>内容</th><th>发送时间</th><th>操作</th></tr></thead>
-        <tbody id="adList"><tr><td colspan="3" style="text-align:center;color:#999">暂无广告</td></tr></tbody>
+        <tbody id="adList"><tr><td colspan="3" style="text-align:center;color:#999">加载中...</td></tr></tbody>
       </table>
     </div>
   </div>
 
-  <!-- 设置 -->
   <div class="page" id="settings">
     <div class="section">
       <h3>价格设置</h3>
@@ -196,6 +188,21 @@ input,select{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:
 </div>
 
 <script>
+const API = 'http://localhost:8000';
+
+async function api(path, options = {}){
+  try{
+    const res = await fetch(API + path, {
+      headers: {'Content-Type': 'application/json'},
+      ...options
+    });
+    return await res.json();
+  }catch(e){
+    console.error(e);
+    return null;
+  }
+}
+
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -203,46 +210,192 @@ function showPage(id){
   event.target.classList.add('active');
   const titles = {dashboard:'数据总览',users:'用户管理',orders:'订单管理',deposits:'充值记录',addresses:'地址管理',energy:'发能量',ads:'广告管理',settings:'设置'};
   document.getElementById('pageTitle').innerText = titles[id] || '后台';
+  
+  if(id === 'dashboard') loadDashboard();
+  if(id === 'users') loadUsers();
+  if(id === 'orders') loadOrders('all');
+  if(id === 'deposits') loadDeposits();
+  if(id === 'addresses') loadAddresses();
+  if(id === 'ads') loadAds();
+  if(id === 'settings') loadSettings();
 }
 
-function searchUsers(){
-  alert('搜索功能需要对接后端API');
+async function loadDashboard(){
+  const data = await api('/api/dashboard');
+  if(!data) return;
+  document.getElementById('todayUsers').innerText = data.today_users;
+  document.getElementById('todayOrders').innerText = data.today_orders;
+  document.getElementById('todayIncome').innerText = data.today_income + ' TRX';
+  document.getElementById('totalUsers').innerText = data.total_users;
+  
+  const tbody = document.getElementById('recentOrders');
+  if(data.recent_orders.length === 0){
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999">暂无数据</td></tr>';
+  }else{
+    tbody.innerHTML = data.recent_orders.map(o => `
+      <tr>
+        <td>${o.created_at?.slice(0,16) || '-'}</td>
+        <td>${o.user_id || '-'}</td>
+        <td>${o.type || '-'}</td>
+        <td>${o.amount || 0}</td>
+        <td class="status-${o.status === 'completed' ? 'ok' : 'pending'}">${o.status || '-'}</td>
+      </tr>
+    `).join('');
+  }
 }
 
-function filterOrders(type){
+async function loadUsers(){
+  const search = document.getElementById('userSearch').value;
+  const data = await api('/api/users' + (search ? '?search=' + search : ''));
+  const tbody = document.getElementById('userList');
+  if(!data || data.length === 0){
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999">暂无数据</td></tr>';
+  }else{
+    tbody.innerHTML = data.map(u => `
+      <tr>
+        <td>${u.user_id}</td>
+        <td>${u.balance || 0} TRX</td>
+        <td>${u.claim_count || 0}</td>
+        <td>${u.created_at?.slice(0,16) || '-'}</td>
+      </tr>
+    `).join('');
+  }
+}
+
+async function loadOrders(type){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   event.target.classList.add('active');
+  const data = await api('/api/orders' + (type !== 'all' ? '?type=' + type : ''));
+  const tbody = document.getElementById('orderList');
+  if(!data || data.length === 0){
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">暂无数据</td></tr>';
+  }else{
+    tbody.innerHTML = data.map(o => `
+      <tr>
+        <td>${o.order_id}</td>
+        <td>${o.user_id || '-'}</td>
+        <td>${o.type}</td>
+        <td>${o.amount}</td>
+        <td class="status-${o.status === 'completed' ? 'ok' : 'pending'}">${o.status}</td>
+        <td>${o.created_at?.slice(0,16) || '-'}</td>
+      </tr>
+    `).join('');
+  }
 }
 
-function sendEnergy(){
+async function loadDeposits(){
+  const data = await api('/api/deposits');
+  const tbody = document.getElementById('depositList');
+  if(!data || data.length === 0){
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999">暂无数据</td></tr>';
+  }else{
+    tbody.innerHTML = data.map(d => `
+      <tr>
+        <td>${d.created_at?.slice(0,16) || '-'}</td>
+        <td>${d.from_address?.slice(0,10) || '-'}...</td>
+        <td>${d.amount} TRX</td>
+        <td class="status-${d.status === 'completed' ? 'ok' : 'pending'}">${d.status}</td>
+        <td>${d.user_id || '-'}</td>
+      </tr>
+    `).join('');
+  }
+}
+
+async function loadAddresses(){
+  const data = await api('/api/addresses');
+  const tbody = document.getElementById('addressList');
+  if(!data || data.length === 0){
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#999">暂无数据</td></tr>';
+  }else{
+    tbody.innerHTML = data.map(a => `
+      <tr>
+        <td>${a.address}</td>
+        <td>${a.claim_count}</td>
+        <td>${a.last_claim?.slice(0,16) || '-'}</td>
+      </tr>
+    `).join('');
+  }
+}
+
+async function sendEnergy(){
   const addr = document.getElementById('energyAddr').value;
-  const count = document.getElementById('energyCount').value;
+  const count = parseInt(document.getElementById('energyCount').value);
   if(!addr || !addr.startsWith('T')){
     alert('请输入有效地址');
     return;
   }
-  document.getElementById('energyResult').innerText = `已向 ${addr.slice(0,8)}... 发送 ${count} 笔能量（演示）`;
+  const data = await api('/api/energy/send', {
+    method: 'POST',
+    body: JSON.stringify({address: addr, count: count})
+  });
+  if(data && data.success){
+    document.getElementById('energyResult').innerText = data.message;
+  }else{
+    document.getElementById('energyResult').innerText = '发送失败';
+  }
 }
 
-function sendAd(){
+async function loadAds(){
+  const data = await api('/api/ads');
+  const tbody = document.getElementById('adList');
+  if(!data || data.length === 0){
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#999">暂无广告</td></tr>';
+  }else{
+    tbody.innerHTML = data.map(a => `
+      <tr>
+        <td>${a.content}</td>
+        <td>${a.created_at?.slice(0,16) || '-'}</td>
+        <td><button class="btn btn-danger" onclick="deleteAd(${a.id})">删除</button></td>
+      </tr>
+    `).join('');
+  }
+}
+
+async function sendAd(){
   const text = document.getElementById('adText').value;
   if(!text){
     alert('请输入广告内容');
     return;
   }
-  alert('广告已发送（演示）');
+  await api('/api/ads', {
+    method: 'POST',
+    body: JSON.stringify({content: text})
+  });
   document.getElementById('adText').value = '';
+  loadAds();
 }
 
-function saveSettings(){
-  document.getElementById('settingsResult').innerText = '设置已保存（演示）';
+async function deleteAd(id){
+  await api('/api/ads/' + id, {method: 'DELETE'});
+  loadAds();
 }
 
-// 演示数据
-document.getElementById('todayUsers').innerText = '12';
-document.getElementById('todayOrders').innerText = '36';
-document.getElementById('todayIncome').innerText = '72 TRX';
-document.getElementById('totalUsers').innerText = '256';
+async function loadSettings(){
+  const data = await api('/api/settings');
+  if(data){
+    document.getElementById('energyPrice').value = data.energy_price || 2;
+    document.getElementById('swapRate').value = data.swap_rate || 3.15;
+    document.getElementById('freeCount').value = data.free_count || 3;
+  }
+}
+
+async function saveSettings(){
+  await api('/api/settings', {
+    method: 'POST',
+    body: JSON.stringify({key: 'energy_price', value: document.getElementById('energyPrice').value})
+  });
+  await api('/api/settings', {
+    method: 'POST',
+    body: JSON.stringify({key: 'swap_rate', value: document.getElementById('swapRate').value})
+  });
+  await api('/api/settings', {
+    method: 'POST',
+    body: JSON.stringify({key: 'free_count', value: document.getElementById('freeCount').value})
+  });
+  document.getElementById('settingsResult').innerText = '设置已保存';
+}
+
+loadDashboard();
 </script>
 </body>
 </html>
