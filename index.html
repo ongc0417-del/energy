@@ -59,6 +59,10 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
 .copy-icon{background:#f5f5f5;border:none;border-radius:6px;padding:6px 10px;cursor:pointer}
 .timer{color:#e6a23c;font-weight:600;margin:12px 0}
 .change-btn{background:#fff;border:1px solid #ddd;color:#333;border-radius:20px;padding:10px 20px;margin-top:12px}
+.menu-item{background:#fff;padding:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0f0f0}
+.menu-item:first-child{border-radius:12px 12px 0 0}
+.menu-item:last-child{border-radius:0 0 12px 12px;border-bottom:none}
+.menu-arrow{color:#ccc}
 </style>
 </head>
 <body>
@@ -167,6 +171,44 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
   </div>
 </div>
 
+<div class="page" id="userPage">
+  <div style="margin:16px;">
+    <div class="menu-item" onclick="showPage('ordersPage')">
+      <span>订单记录</span><span class="menu-arrow">></span>
+    </div>
+    <div class="menu-item">
+      <span>用户 ID</span><span id="userIdDisplay">-</span>
+    </div>
+    <div class="menu-item" onclick="alert('用户须知\n\n1. 每日免费能量仅限已激活且有USDT的地址\n2. 未激活或无USDT地址需使用余额支付\n3. 余额充值后立即到账')">
+      <span>用户须知</span><span class="menu-arrow">></span>
+    </div>
+    <div class="menu-item" onclick="document.getElementById('tutorial').style.display='flex'">
+      <span>指南</span><span class="menu-arrow">></span>
+    </div>
+    <div class="menu-item">
+      <span>语言</span><span>简体中文</span>
+    </div>
+    <div class="menu-item" onclick="tg.openTelegramLink('https://t.me/your_support')">
+      <span>联系客服</span><span class="menu-arrow">></span>
+    </div>
+    <div class="menu-item">
+      <span>版本号</span><span>v1.0.0</span>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="ordersPage">
+  <div class="section">
+    <div class="section-title">订单记录</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <span style="background:#fff9e6;color:#e6a23c;padding:6px 12px;border-radius:16px;font-size:13px;">全部</span>
+      <span style="background:#f5f5f5;color:#999;padding:6px 12px;border-radius:16px;font-size:13px;">有效中</span>
+      <span style="background:#f5f5f5;color:#999;padding:6px 12px;border-radius:16px;font-size:13px;">已到期</span>
+    </div>
+    <div id="ordersList" style="text-align:center;color:#999;padding:20px">暂无订单</div>
+  </div>
+</div>
+
 <div class="page" id="successPage">
   <div class="success">
     <div class="icon">✓</div>
@@ -194,7 +236,7 @@ tg.ready();
 tg.expand();
 
 const USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
-const RECHARGE_ADDRESS = 'TYourRechargeAddressHere'; // 改成你的充值地址
+const RECHARGE_ADDRESS = 'TYourRechargeAddressHere';
 
 let freeLeft = 3;
 let balance = 0;
@@ -210,11 +252,11 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const titles = {energyPage:'能量领取', rechargePage:'充值', userPage:'个人中心'};
+  const titles = {energyPage:'能量领取', rechargePage:'充值', userPage:'个人中心', ordersPage:'订单记录'};
   document.getElementById('pageTitle').innerText = titles[id] || '能量领取';
   if(id==='energyPage') document.querySelectorAll('.nav-item')[0].classList.add('active');
   if(id==='rechargePage') document.querySelectorAll('.nav-item')[1].classList.add('active');
-  if(id==='userPage') document.querySelectorAll('.nav-item')[2].classList.add('active');
+  if(id==='userPage' || id==='ordersPage') document.querySelectorAll('.nav-item')[2].classList.add('active');
 }
 
 async function checkAddress(address){
@@ -416,7 +458,7 @@ function resetRecharge(){
 }
 
 if(tg.initDataUnsafe && tg.initDataUnsafe.user){
-  document.getElementById('userId').innerText = tg.initDataUnsafe.user.id;
+  document.getElementById('userIdDisplay').innerText = tg.initDataUnsafe.user.id;
 }
 </script>
 </body>
