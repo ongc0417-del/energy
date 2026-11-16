@@ -26,6 +26,7 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
 .input-box{background:#f8f8f8;border:1px solid #eee;border-radius:10px;padding:12px;min-height:48px;font-size:15px;word-break:break-all}
 .input-box.active{border-color:#e6a23c}
 .check{color:#52c41a;font-size:13px;margin-left:8px}
+.check-danger{color:#ff4d4f;font-size:13px;margin-left:8px;font-weight:600}
 .tip{font-size:13px;color:#999;margin-top:8px;line-height:1.5}
 .pay-options{display:flex;gap:12px;margin-top:12px}
 .pay-option{flex:1;border:1px solid #eee;border-radius:12px;padding:12px;text-align:center;cursor:pointer}
@@ -50,6 +51,7 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
 .copy-btn{color:#007aff;font-size:13px;float:right}
 .page{display:none}
 .page.active{display:block}
+.warning-box{background:#fff2f0;border:1px solid #ffccc7;color:#ff4d4f;padding:12px;border-radius:10px;margin-top:12px;font-size:14px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -103,6 +105,7 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
     <div class="section-title">2 对方收款地址 <span class="paste" onclick="pasteAddr('to')">粘贴</span></div>
     <div class="input-box" id="toBox" onclick="focusInput('to')">输入对方收款地址，判断所需能量</div>
     <div id="toCheck"></div>
+    <div id="riskWarning"></div>
     <div class="tip">系统自动计算对方地址转账所需能量数量，无需手动选择笔数。<br>填写两个地址后自动试算。</div>
   </div>
 
@@ -130,7 +133,7 @@ body{background:#f5f5f5;color:#333;padding-bottom:70px}
       </div>
       <div class="pay-option" id="payBalance" onclick="selectPay('balance')">
         <div class="name">余额支付</div>
-        <div class="desc">用户余额不足</div>
+        <div class="desc" id="balanceDesc">用户余额不足</div>
       </div>
     </div>
   </div>
@@ -182,7 +185,7 @@ tg.ready();
 tg.expand();
 
 const USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
-const RECHARGE_ADDRESS = 'TYourRechargeAddressHere'; // 改成你的充值地址
+const RECHARGE_ADDRESS = 'TYourRechargeAddressHere';
 
 let freeLeft = 3;
 let balance = 0;
@@ -190,6 +193,7 @@ let fromAddr = '';
 let toAddr = '';
 let payType = 'free';
 let needEnergy = 1;
+let isHighRisk = false;
 let claimedAddresses = JSON.parse(localStorage.getItem('claimedAddresses') || '[]');
 
 function showPage(id){
@@ -220,6 +224,34 @@ async function checkAddress(address){
   }
 }
 
+function updateRiskUI(info){
+  isHighRisk = !info.activated || !info.hasUsdt;
+  needEnergy = info.hasUsdt ? 1 : 2;
+  const needTrx = needEnergy * 2;
+
+  if(isHighRisk){
+    let reason = !info.activated ? '未激活' : '无USDT';
+    document.getElementById('toCheck').innerHTML = `<span class="check-danger">✗ ${reason}</span>`;
+    document.getElementById('riskWarning').innerHTML = `
+      <div class="warning-box">
+        <strong>高危地址（${reason}）</strong><br>
+        该地址需要 <strong>${needEnergy} 笔</strong> 能量，请使用<strong>余额支付</strong>。<br>
+        需要余额：<strong>${needTrx} TRX</strong>
+      </div>
+    `;
+    // 强制选余额支付
+    selectPay('balance');
+    document.getElementById('payFree').style.opacity = '0.5';
+    document.getElementById('payFree').style.pointerEvents = 'none';
+  } else {
+    document.getElementById('toCheck').innerHTML = '<span class="check">✓ 有USDT</span>';
+    document.getElementById('riskWarning').innerHTML = '';
+    document.getElementById('payFree').style.opacity = '1';
+    document.getElementById('payFree').style.pointerEvents = 'auto';
+  }
+  document.getElementById('balanceDesc').innerText = `需要 ${needTrx} TRX`;
+}
+
 async function pasteAddr(type){
   try{
     let text = await navigator.clipboard.readText();
@@ -239,9 +271,7 @@ async function pasteAddr(type){
       document.getElementById('toBox').classList.add('active');
       document.getElementById('toCheck').innerHTML = '<span class="check">检查中...</span>';
       const info = await checkAddress(text);
-      needEnergy = info.hasUsdt ? 1 : 2;
-      let msg = info.activated ? (info.hasUsdt ? '有USDT' : '无USDT') : '未激活';
-      document.getElementById('toCheck').innerHTML = '<span class="check">✓ ' + msg + '</span>';
+      updateRiskUI(info);
     }
     calc();
   }catch(e){
@@ -263,9 +293,7 @@ async function focusInput(type){
       document.getElementById('toBox').classList.add('active');
       document.getElementById('toCheck').innerHTML = '<span class="check">检查中...</span>';
       const info = await checkAddress(text);
-      needEnergy = info.hasUsdt ? 1 : 2;
-      let msg = info.activated ? (info.hasUsdt ? '有USDT' : '无USDT') : '未激活';
-      document.getElementById('toCheck').innerHTML = '<span class="check">✓ ' + msg + '</span>';
+      updateRiskUI(info);
     }
     calc();
   }
@@ -283,6 +311,7 @@ function calc(){
 }
 
 function selectPay(type){
+  if(isHighRisk && type==='free') return;
   payType = type;
   document.getElementById('payFree').classList.toggle('active', type==='free');
   document.getElementById('payBalance').classList.toggle('active', type==='balance');
@@ -290,8 +319,8 @@ function selectPay(type){
 }
 
 function submitOrder(){
-  if(needEnergy > 1){
-    alert('高危地址，请使用余额购买能量');
+  if(isHighRisk && payType==='free'){
+    alert('高危地址，请使用余额支付');
     return;
   }
   if(payType==='free' && freeLeft < needEnergy){
@@ -299,7 +328,7 @@ function submitOrder(){
     return;
   }
   if(payType==='balance' && balance < needEnergy*2){
-    alert('余额不足，请先充值');
+    alert(`余额不足，需要 ${needEnergy*2} TRX，请先充值`);
     return;
   }
   document.getElementById('submitBtn').innerText = '处理中...';
